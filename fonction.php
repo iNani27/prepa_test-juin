@@ -1,12 +1,12 @@
 <?php
 require_once 'config.php';
-
 /*
- * 
- * Fonction d'upload de l'image d'origine, renvoie un tableau si réussie sinon renvoie une chaine de caractère contenant l'erreur
- * 
- *  
+ * Fonction d'upload de l'image d'origine, renvoie un tableau si réussie sinon renvoie une chaine de caractère contenant l'erreur 
  */
+function traite_chaine($chaine) {
+    $sortie = htmlentities(strip_tags(trim($chaine)), ENT_QUOTES);
+    return $sortie;
+}
 
 function upload_originales($fichier,$destination,$ext){ 
     $sortie = array();
