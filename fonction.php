@@ -1,11 +1,9 @@
 <?php
-
 require_once 'config.php';
 /*
  * Fonction d'upload de l'image d'origine, renvoie un tableau si réussie sinon renvoie une chaine de caractère contenant l'erreur
  * Utilisation upload_originales("$_FILE","url du dossier","extentions permises (array)")
  */
-
 function traite_chaine($chaine) {
     $sortie = htmlentities(strip_tags(trim($chaine)), ENT_QUOTES);
     return $sortie;
@@ -45,7 +43,6 @@ function upload_originales($fichier, $destination, $ext) {
  * appel => chaine_hasard(int);
  * 
  */
-
 function chaine_hasard($nombre_caracteres) {
     $caracteres = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,0,1,2,3,4,5,6,7,8,9";
     $tableau = explode(",", $caracteres);
@@ -71,9 +68,8 @@ function chaine_hasard($nombre_caracteres) {
  * "Proportion TRUE par defaut , garde les proportions, mettre en FALSE si on souhaite centrer l'image et la couper
  * 
  */
-
 function creation_img($chemin_org, $nom, $extension, $destination, $largeur_max, $hauteur_max, $qualite, $proportion = true) {
-    // chemin + nom + point + extension de l'image à traitée
+    // chemin + nom + '.' + extension de l'image à traitée
     $chemin_image = $chemin_org . $nom . '.' . $extension;
     // récupération des paramètres de l'images
     $param_image = getimagesize($chemin_image);
@@ -84,50 +80,130 @@ function creation_img($chemin_org, $nom, $extension, $destination, $largeur_max,
     $ratio_l = $largeur_org / $largeur_max;
     // calcul du ratio hauteur originale avec la heuteur maximale
     $ratio_h = $hauteur_org / $hauteur_max;
-    // on vérifie si un ratio est plus grand que l'autre (L > H)
-    if ($ratio_l > $ratio_h) {
-    // si la largeur originale est plus petite que largeur maximale on va garder la taille d'origine en Largeur mais aussi en hauteur!
-        if ($ratio_l < 1) {
-            $largeur_dest = $largeur_org;
-            $hauteur_dest = $hauteur_org;
-        } else {
-            // on donne la largeur maximale comme référence
-            $largeur_dest = $largeur_max;
-            // on calcule la hauteur grâce à son ratio
-            $hauteur_dest = round($hauteur_org / $ratio_h);
-        }
-        // sinon (le ratio hauteur est plus grand ou égale au ratio largeur)   
-    } else {
-        // si la hauteur originale est plus petite que hauteur maximale on va garder la taille d'origine en hauteur mais aussi en largeur!
-        if ($ratio_h < 1) {
-            $largeur_dest = $largeur_org;
-            $hauteur_dest = $hauteur_org;
-        } else {
-            // on calcule la largeur grâce à son ratio
-            $largeur_dest = round($largeur_org / $ratio_l);
-            // on donne la hauteur maximale comme référence
-            $hauteur_dest = $hauteur_max;
-        }
-    }
-    // création d'une image vide aux bonnes dimensions dans laquelle ou colera l'image d'origine 
-    $nouvelle_image = imagecreatetruecolor($largeur_dest, $hauteur_dest);
-    switch ($extension) {
-        case '.jpg':
-            $image_finale = imagecreatefromjpeg($chemin_image);
-            // copie de l'image d'origine vers l'image finale
-            imagecopyresampled($nouvelle_image, $image_finale, 0, 0, 0, 0, $largeur_dest, $hauteur_dest, $largeur_org, $hauteur_org);
-            // création de l'image finale en .jpg dans le dossier de destination avec la qualité passée en paramètre
-            imagejpeg($nouvelle_image, $destination . $nom, $qualite);
-            break;
-        case '.png':
+    
+ // création de l'image temporaire suivant le format
+    switch ($extension){
+        case 'jpg':
+            $image_finale = imagecreatefromjpeg($chemin_image);           
+            break;       
+        case 'png':
             $image_finale = imagecreatefrompng($chemin_image);
-            // copie de l'image d'origine vers l'image finale
-            imagecopyresampled($nouvelle_image, $image_finale, 0, 0, 0, 0, $largeur_dest, $hauteur_dest, $largeur_org, $hauteur_org);
-            // création de l'image finale en .png dans le dossier de destination (rem: la transparance n'est pas gardée)
-            imagepng($nouvelle_image, $destination . $nom);
             break;
         default:
             return false;
     }
+    
+    /*
+     * Si on veut respecter le ratio
+     */
+    if($proportion==true){  
+        // on vérifie si un ratio est plus grand que l'autre (L > H)
+        if ($ratio_l > $ratio_h) {
+            // si la largeur originale est plus petite que largeur maximale on va garder la taille d'origine en Largeur mais aussi en hauteur!
+            if ($ratio_l < 1) {
+                $largeur_dest = $largeur_org;
+                $hauteur_dest = $hauteur_org;
+            } else {
+                // on donne la largeur maximale comme référence
+                $largeur_dest = $largeur_max;
+                // on calcule la hauteur grâce au ratio de large
+                $hauteur_dest = round($hauteur_org / $ratio_l);
+            }
+
+            // sinon (le ratio hauteur est plus grand ou égale au ratio largeur)   
+        } else {
+            // si la hauteur originale est plus petite que hauteur maximale on va garder la taille d'origine en hauteur mais aussi en largeur!
+            if ($ratio_h < 1) {
+                $largeur_dest = $largeur_org;
+                $hauteur_dest = $hauteur_org;
+            } else {
+                // on calcule la largeur grâce au ratio de haut
+                $largeur_dest = round($largeur_org / $ratio_h);
+                // on donne la hauteur maximale comme référence
+                $hauteur_dest = $hauteur_max;
+            }
+        }
+
+        // création d'une image vide aux bonnes dimensions dans laquelle ou colera l'image d'origine 
+        $nouvelle_image = imagecreatetruecolor($largeur_dest, $hauteur_dest);
+
+       
+        // copie de l'image d'origine vers l'image finale
+        imagecopyresampled($nouvelle_image, $image_finale, 0, 0, 0, 0, $largeur_dest, $hauteur_dest, $largeur_org, $hauteur_org);
+        // création de l'image finale en .jpg dans le dossier de destination avec la qualité passée en paramètre
+        
+        
+         
+    /*
+     * Si on veut créer un fichier avec crop centré ($proportion==false)
+     */
+    }else{
+    
+    
+/*
+ * 
+ * ON EST ICI
+ * 
+ */        
+        
+        
+        
+    // REFAIRE LE CALCUL
+        
+    if($ratio_l>$ratio_h){
+        // si la largeur originale est plus petite que largeur maximale on va garder la taille d'origine en Largeur mais aussi en hauteur!
+        if($ratio_l < 1){
+            $largeur_dest = $largeur_org;
+            $hauteur_dest = $hauteur_org;
+        }else{
+            // on donne la largeur maximale comme référence
+            $largeur_dest = $largeur_max;
+            // on calcule la hauteur grâce au ratio de large
+            $hauteur_dest = round($hauteur_org/$ratio_l);
+        }
+        
+    // sinon (le ratio hauteur est plus grand ou égale au ratio largeur)   
+    }else{
+        // si la hauteur originale est plus petite que hauteur maximale on va garder la taille d'origine en hauteur mais aussi en largeur!
+        if($ratio_h < 1){
+            $largeur_dest = $largeur_org;
+            $hauteur_dest = $hauteur_org;
+        }else{
+            // on calcule la largeur grâce au ratio de haut
+            $largeur_dest = round($largeur_org/$ratio_h);
+            // on donne la hauteur maximale comme référence
+            $hauteur_dest = $hauteur_max;
+        }
+    }    
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    // création d'une image vide aux dimensions fixes passées à la fonction
+    $nouvelle_image = imagecreatetruecolor($largeur_max, $hauteur_max);    
+    // copie de l'image d'origine vers l'image finale
+   imagecopyresampled($nouvelle_image, $image_finale, 0, 0, 0, 0, $largeur_dest, $hauteur_dest, $largeur_org, $hauteur_org);    
+        
+        
+        
+    }
+    
+    // création de l'image finale en .jpg dans le dossier de destination avec la qualité passée en paramètre
+    imagejpeg($nouvelle_image, $destination.$nom.'.jpg', $qualite);
+    // destruction de l'image temporaire
+    imagedestroy($nouvelle_image);
     return true;
 }

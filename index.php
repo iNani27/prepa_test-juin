@@ -24,6 +24,7 @@ if (isset($_POST['lelogin'])) {
         $_SESSION = $recup_user; // transformation des résultats de la requête en variable de session
         $_SESSION['sid'] = session_id(); // récupération de la clef de session
         /* var_dump($_SESSION); */
+        $_SESSION['lelogin']=$lelogin;
         //redirection vers la page d'accueil
         /* header('Location : '.CHEMIN_RACINE."?hahaok"); */
         //Pour éviter les doubles connexion par F5
@@ -53,8 +54,11 @@ if (isset($_POST['lelogin'])) {
                         <input type="password" name="lemdp" required />
                         <input type="submit" value="Connexion" />
                     </form>
+                <p>
                     <a href="mdp.php">Mot de passe oublié?</a>
+                     | 
                     <a href="inscription.php">Inscription</a>
+                </p>
                     <?php
                     // sinon on est connecté
                 } else {

@@ -23,7 +23,11 @@ if (isset($_POST['letitre']) && isset($_FILES['lefichier'])) {
         // si on a pas d'erreur, on va insérer dasn la DB et créer sa miniature et sa grande image
     } else {
         var_dump($upload);
-       
+       // création de la grande image qui garde les proportions
+        creation_img($dossier_ori, $upload['nom'],$upload['extension'],$dossier_gd,$grande_large,$grande_haute,$grande_qualite);
+        
+        // création de la miniature
+        creation_img($dossier_ori, $upload['nom'],$upload['extension'],$dossier_mini,$mini_large,$mini_haute,$mini_qualite, false); 
     }
 }
 ?>
@@ -34,7 +38,7 @@ if (isset($_POST['letitre']) && isset($_FILES['lefichier'])) {
 <html>
     <head>
         <meta charset="UTF-8">
-        <title><?= $_SESSION['lelogin']; ?> - Votre Espace membre</title>
+        <title><?php echo $_SESSION['lelogin']?> - Votre Espace membre</title>
     </head>
     <body>
         <div id="content">
@@ -43,19 +47,17 @@ if (isset($_POST['letitre']) && isset($_FILES['lefichier'])) {
                 <?php
                 //Texte d'accueil
                 echo "<h3>Bonjour " . $_SESSION['lenom'] . "</h3>";
-                echo "<p>Vous êtes connecté en tant que <span title='" . $SESSION['ladesc'] . "'>" . $SESSION['nom_perm'] . "</span></p>";
+                echo "<p>Vous êtes connecté en tant que <span title='" . $_SESSION['ladesc'] . "'>" . $_SESSION['nom_perm'] . "</span></p>";
                 echo "<h5><a href='deconnect.php'>Déconnexion</a></h5>";
                 // liens selon perm
                 switch ($_SESSION["laperm"]) {
                     // admin
                     case 0:
-                        echo "<a href='admin.php'>Administrer le site</a>";
-                        echo "<a href='membre.php'>Espace membres</a>";
+                        echo "<a href='admin.php'>Administrer le site</a> | <a href='membre.php'>Espace membres</a>";
                         break;
                     // modérateur
                     case 1:
-                        echo "<a href='moder.php'>Modérer le site</a>";
-                        echo "<a href='membre.php'>Espace membres</a>";
+                        echo "<a href='moder.php'>Modérer le site</a> | <a href='membre.php'>Espace membres</a>";
                         break;
                     // utilisateur
                     default:
@@ -63,7 +65,7 @@ if (isset($_POST['letitre']) && isset($_FILES['lefichier'])) {
                 }
                 ?>
             </div>
-            <div id="milieu">
+            <div style="margin:20px 0;" id="milieu">
                 <div id="formulaire">
                     <form action="" enctype="multipart/form-data" method="POST" name="onposte">
                         <input type="text" name="letitre" required /><br/>
