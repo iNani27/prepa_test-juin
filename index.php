@@ -18,7 +18,7 @@ if (isset($_POST['lelogin'])) {
     $recup_user = mysqli_fetch_assoc($req);
 
     // Vérifier si on a récupérer un utilisateur
-    if (mysqli_num_rows($recup_user)) {
+    if (mysqli_num_rows($req)) {
 
 // Si l'utilisateur s'est bien connecté  
         $_SESSION = $recup_user; // transformation des résultats de la requête en variable de session
@@ -60,19 +60,17 @@ if (isset($_POST['lelogin'])) {
                 } else {
                     //Texte d'accueil
                     echo "<h3>Bonjour " . $_SESSION['lenom'] . "</h3>";
-                    echo "<p>Vous êtes connecté en tant que <span title='" . $SESSION['ladesc'] . "'>" . $SESSION['nom_perm'] . "</span></p>";
+                    echo "<p>Vous êtes connecté en tant que <span title='" . $_SESSION['ladesc'] . "'>" . $_SESSION['nom_perm'] . "</span></p>";
                     echo "<h5><a href='deconnect.php'>Déconnexion</a></h5>";
                     // liens selon perm
                     switch ($_SESSION["laperm"]) {
                         // admin
                         case 0:
-                            echo "<a href='admin.php'>Administrer le site</a>";
-                            echo "<a href='membre.php'>Espace membres</a>";
+                            echo "<a href='admin.php'>Administrer le site</a> | <a href='membre.php'>Espace membres</a>";
                             break;
                         // modérateur
                         case 1:
-                            echo "<a href='moder.php'>Modérer le site</a>";
-                            echo "<a href='membre.php'>Espace membres</a>";
+                            echo "<a href='moder.php'>Modérer le site</a> | <a href='membre.php'>Espace membres</a>";
                             break;
                         // utilisateur
                         default:
